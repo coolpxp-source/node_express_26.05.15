@@ -3,7 +3,7 @@ const figlet = require('figlet');
 figlet.text(
   "Boo!",
   {
-    font: "Ghost",
+    font: "Star Wars",
     horizontalLayout: "default",
     verticalLayout: "default",
     width: 80,
@@ -18,3 +18,4 @@ figlet.text(
     console.log(data);
   }
 );
+console.dir(figlet.fontsSync(), {maxArrayLength : null});
