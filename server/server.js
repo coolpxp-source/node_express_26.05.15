@@ -60,13 +60,13 @@ app.get('/stu/list', async (req, res) => {
 
 app.get('/stu/remove', async (req, res) => {
   // console.log(req.query)
-  const {stuNo } = req.query;
+  const { stuNo } = req.query;
   console.log(stuNo)
+
   try {
     const result = await connection.execute(`DELETE FROM STUDENT WHERE STU_NO = ${stuNo}`);
-    // await : 작업이 다 끝날 때까지 코드가 아래로 내려가지 않도록 방지함. =>대기 상태.
     console.log(result);
-    await connection.commit(); // commit
+    await connection.commit();
 
     res.json({
         result : "success",
@@ -79,17 +79,17 @@ app.get('/stu/remove', async (req, res) => {
 
 app.get('/stu/edit', async (req, res) => {
   // console.log(req.query)
-  const {stuNo } = req.query;
-  const dept = "소프트웨어"
+  const { stuNo } = req.query;
+  const dept = "소프트웨어";
+
   try {
     const result = await connection.execute(
-      `UPDATE STUDENT SET STU_DEPT = :dept WHERE STU_NO = "stuNo`,
+      `UPDATE STUDENT SET STU_DEPT = :dept WHERE STU_NO = :stuNo`,
       [dept, stuNo],
-      {autoCommit: true}
+      {autoCommit : true}
     );
-    // await : 작업이 다 끝날 때까지 코드가 아래로 내려가지 않도록 방지함. =>대기 상태.
     console.log(result);
-    await connection.commit(); // commit
+    await connection.commit();
 
     res.json({
         result : "success",
