@@ -3,9 +3,7 @@ const cors = require('cors');
 const oracledb = require('oracledb');
 
 const app = express();
-
-// 1. 오타 수정: cors()
-app.use(cors()); 
+app.use(cors());
 
 const config = {
   user: 'SYSTEM',
@@ -13,8 +11,10 @@ const config = {
   connectString: 'localhost:1521/xe'
 };
 
+// Oracle 데이터베이스와 연결을 유지하기 위한 전역 변수
 let connection;
 
+// 데이터베이스 연결 설정
 async function initializeDatabase() {
   try {
     connection = await oracledb.getConnection(config);
@@ -26,28 +26,28 @@ async function initializeDatabase() {
 
 initializeDatabase();
 
-// 라우트 설정들을 모두 위로 올립니다.
 app.get('/', (req, res) => {
-  res.send('Hello World')
+  res.send('Hello World HaHa')
 })
 
 app.get('/test', (req, res) => {
-  res.send('Hello Express')
+  res.send('Hello Express HaHaHa')
 })
 
 app.get('/stu/list', async (req, res) => {
+  const { } = req.query;
   try {
     const result = await connection.execute(`SELECT * FROM STUDENT`);
     const columnNames = result.metaData.map(column => column.name);
-    
+    // 쿼리 결과를 JSON 형태로 변환
     const rows = result.rows.map(row => {
+      // 각 행의 데이터를 컬럼명에 맞게 매핑하여 JSON 객체로 변환
       const obj = {};
       columnNames.forEach((columnName, index) => {
         obj[columnName] = row[index];
       });
       return obj;
     });
-    
     res.json({
         result : "success",
         list : rows
@@ -58,9 +58,49 @@ app.get('/stu/list', async (req, res) => {
   }
 });
 
-// 2. 서버 실행(listen)은 반드시 맨 마지막에!
-// 포트 번호도 터미널에서 확인하신 3009로 맞추는 것이 안전합니다.
-const PORT = 3009; 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`)
+app.get('/stu/remove', async (req, res) => {
+  // console.log(req.query)
+  const {stuNo } = req.query;
+  console.log(stuNo)
+  try {
+    const result = await connection.execute(`DELETE FROM STUDENT WHERE STU_NO = ${stuNo}`);
+    // await : 작업이 다 끝날 때까지 코드가 아래로 내려가지 않도록 방지함. =>대기 상태.
+    console.log(result);
+    await connection.commit(); // commit
+
+    res.json({
+        result : "success",
+    });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).send('Error executing query');
+  }
+});
+
+app.get('/stu/edit', async (req, res) => {
+  // console.log(req.query)
+  const {stuNo } = req.query;
+  const dept = "소프트웨어"
+  try {
+    const result = await connection.execute(
+      `UPDATE STUDENT SET STU_DEPT = :dept WHERE STU_NO = "stuNo`,
+      [dept, stuNo],
+      {autoCommit: true}
+    );
+    // await : 작업이 다 끝날 때까지 코드가 아래로 내려가지 않도록 방지함. =>대기 상태.
+    console.log(result);
+    await connection.commit(); // commit
+
+    res.json({
+        result : "success",
+    });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).send('Error executing query');
+  }
+});
+
+
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000')
 })

@@ -31,12 +31,8 @@ async function initializeDatabase() {
 
 initializeDatabase();
 
-// 엔드포인트
-app.get('/', (req, res) => {
-  res.send('Hello World');
-});
-
-app.get('/list', async (req, res) => {
+// RESTful API 적용
+app.get('/student', async (req, res) => {
   const { } = req.query;
   try {
     const result = await connection.execute(`SELECT * FROM STUDENT`);
@@ -60,86 +56,30 @@ app.get('/list', async (req, res) => {
   }
 });
 
-
-app.get('/search', async (req, res) => {
-  const { id } = req.query;
+app.delete('/student/:stuNo', async (req, res) => {
+  console.log("delete 호출")
+  console.log(req.params);
+  const {stuNo } = req.params;
+  // console.log(stuNo)
   try {
-    const result = await connection.execute(`SELECT * FROM STUDENT WHERE STU_NO LIKE '%${id}%'`);
-    const columnNames = result.metaData.map(column => column.name);
+    const result = await connection.execute(`DELETE FROM STUDENT WHERE STU_NO =:stuNo`,
+      [stuNo],
+      {autoCommit : true}
+    );
+    // await : 작업이 다 끝날 때까지 코드가 아래로 내려가지 않도록 방지함. =>대기 상태.
+    console.log(result);
+    // await connection.commit(); // commit
 
-    // 쿼리 결과를 JSON 형태로 변환
-    const rows = result.rows.map(row => {
-      // 각 행의 데이터를 컬럼명에 맞게 매핑하여 JSON 객체로 변환
-      const obj = {};
-      columnNames.forEach((columnName, index) => {
-        obj[columnName] = row[index];
-      });
-      return obj;
+    res.json({
+        result : "success",
     });
-    res.json(rows);
   } catch (error) {
     console.error('Error executing query', error);
     res.status(500).send('Error executing query');
   }
 });
 
-app.get('/insert', async (req, res) => {
-  const { stu_no, name, dept } = req.query;
-
-  try {
-    await connection.execute(
-      `INSERT INTO STUDENT (STU_NO, NAME, DEPT) VALUES (:stu_no, :name, :dept)`,
-      [stu_no, name, dept],
-      { autoCommit: true }
-    );
-    res.json({
-        result : "success"
-    });
-  } catch (error) {
-    console.error('Error executing insert', error);
-    res.status(500).send('Error executing insert');
-  }
-});
-
-
-app.get('/update', async (req, res) => {
-  const { stu_no, name, dept } = req.query;
-
-  try {
-    await connection.execute(
-      `UPDATE STUDENT SET NAME = :name, DEPT = :dept WHERE STU_NO = :stu_no`,
-      [name, dept, stu_no],
-      { autoCommit: true }
-    );
-    res.json({
-        result : "success"
-    });
-  } catch (error) {
-    console.error('Error executing update', error);
-    res.status(500).send('Error executing update');
-  }
-});
-
-
-app.get('/delete', async (req, res) => {
-  const { stu_no } = req.query;
-
-  try {
-    await connection.execute(
-      `DELETE FROM STUDENT WHERE STU_NO = :stu_no`,
-      [stu_no],
-      { autoCommit: true }
-    );
-    res.json({
-        result : "success"
-    });
-  } catch (error) {
-    console.error('Error executing delete', error);
-    res.status(500).send('Error executing delete');
-  }
-});
-
 // 서버 시작
-app.listen(3009, () => {
-  console.log('Server is running on port 3009');
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
