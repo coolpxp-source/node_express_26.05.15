@@ -63,6 +63,17 @@
                     .then(res => res.json())
                     .then(data => {
                         self.list = data.list;
+                        
+                        // for 반복문
+                        //for(let i=0; i<self.list.length; i++){
+                          //  self.list[i].viewUrl
+                            //    = "stu-view.html?stuNo="+self.list[i].STU_NO;
+                           // console.log(self.list);
+                       // }
+                        // 위의 구문을 forEach로 수정?
+                        self.list.forEach(item => { // item -> 원하는 이름 사용 가능(리스트의 첫번째 값이 item에 담긴다!)
+                            item.viewUrl = "stu-view.html?stuNo=" + item.STU_NO;
+                        });
                     })
             },
             fnRemove : function(stuNo){

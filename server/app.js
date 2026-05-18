@@ -162,6 +162,30 @@ app.get('/student/:stuNo', async (req, res) => {
   }
 });
 
+// tbl_user table 이용 login.
+app.post('/login', async (req, res) => { // CRUD를 위한 용도가 아니라서 독립적인 주소를 가져도 된다.
+  console.log("post 호출")
+  const {userId, pwd } = req.body;
+  try {
+    const result = await connection.execute(
+       `SELECT * FROM TBL_USER WHERE USERID = :userId AND PWD = :pwd`,
+      [userId, pwd],
+      { autoCommit: true }
+    );
+    // await : 작업이 다 끝날 때까지 코드가 아래로 내려가지 않도록 방지함. =>대기 상태.
+    console.log(result);
+
+    res.json({
+        result : "success",
+        list : result.rows
+    });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).send('Error executing query');
+  }
+});
+
+
 // 서버 시작
 // app.listen(3000, () => {
 //   console.log('Server is running on port 3000');
