@@ -18,23 +18,41 @@
         tr:nth-child(even){
             background-color: azure;
         }
+        .button{
+            width: 50px;
+            margin-top: 5px;
+            margin-right: 10pt;
+            margin-left: 10pt;
+            background-color: azure;
+            padding: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .button:hover{
+            box-shadow: 1px 1px 1px gray;
+            background-color: aquamarine;
+        }
+        .input-box{
+            height: 25px;
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <!-- html 코드는 id가 app인 태그 안에서 작업 -->
         <div>
-            <div style="margin: 20px; padding : 10px;">
+            <div style="margin: 20px; padding : 10px; " >
                 <div>
                     <label>검색어 : 
-                        <input v-model="keyword">
-                        <button @click="fnList()">검색</button>
+                        <input v-model="keyword" class="input-box">
+                        <button class="button"  @click="fnList()">검색</button>
                     </label>
                     <select v-model="sortBy" @change="fnList()">
                         <option value="CDATETIME">날짜순</option>
                         <option value="TITLE">제목순</option>
                         <option value="CNT">조회수</option>
                     </select>
+                    <button class="button" @click="fnAdd()">추가</button>
                 </div>
             </div>
             <table>
@@ -49,11 +67,11 @@
                 <tr v-for="item in list">
                     <td>{{item.BOARDNO}}</td>
                     <td>{{item.USERID}}</td>
-                    <td>{{item.TITLE}}</td>
+                    <td><a href="javascript:;" @click="fnView(item.BOARDNO)">{{item.TITLE}}</a></td>
                     <td>{{item.CONTENTS}}</td>
                     <td>{{item.CNT}}</td>
                     <td>{{item.CDATE}}</td>
-                    <td><button >삭제</button></td>
+                    <!-- <td><button class="button">삭제</button></td> -->
                     <!-- 수정 버튼 클릭 시 해당 학생의 학과를 '소프트웨어'로 변경 -->
                 </tr>
             </table>
@@ -86,6 +104,12 @@
                         });
                     })
             },
+            fnView: function(boardNo) {
+                location.href = "board-view.html?boardNo=" + boardNo;
+            },
+            fnAdd : function(){
+                location.href = "board-add.html";
+            }
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분

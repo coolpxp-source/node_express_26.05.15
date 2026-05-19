@@ -4,6 +4,8 @@ const db = require("../db"); // db파일 참조
 const bcrypt = require('bcrypt');
 const router = express.Router(); // 라우터 사용을 위한 호출
 
+const saltRounds = 10;
+
 module.exports = router; // app에서 참조할 수 있도록 넣는 코드
 
 // tbl_user table 이용 login.
@@ -14,8 +16,8 @@ router.post('/login', async (req, res) => { // CRUD를 위한 용도가 아니�
   try {
     connection = await db.getConnection();
     const result = await connection.execute(
-       `SELECT * FROM TBL_USER WHERE USERID = :userId AND PWD = :pwd`,
-      [userId, pwd],
+       `SELECT * FROM TBL_USER WHERE USERID = :userId`,
+      {userId : userId},
       { 
         autoCommit: true ,
         outFormat: oracledb.OUT_FORMAT_OBJECT
@@ -29,13 +31,18 @@ router.post('/login', async (req, res) => { // CRUD를 위한 용도가 아니�
     let info = {}
 
     if(result.rows.length > 0){
-      message ="success";
-      info = {
-        userId : result.rows[0].USERID,
-        userName : result.rows[0].USERNAME,
-      }
-    }else{
-      message ="fail";
+    let match = await bcrypt.compare(pwd, result.rows[0].PWD);
+    if(match){
+        message = "success";
+        info = {
+            userId: result.rows[0].USERID,
+            userName: result.rows[0].USERNAME,
+        }
+    } else {
+        message = "fail"; // 비밀번호 틀림
+    }
+    } else {
+        message = "fail"; // 아이디 없음
     }
     
     res.json({
@@ -54,9 +61,11 @@ router.post('/login', async (req, res) => { // CRUD를 위한 용도가 아니�
 router.post('/join', async (req, res) => { // CRUD를 위한 용도가 아니라서 독립적인 주소를 가져도 된다.
   console.log("post 호출")
   const {userId, pwd, userName } = req.body;
+  const hashPwd = await bcrypt.hash(pwd, saltRounds);
+  let connection;
   try {
      // 1. 중복 확인
-    let connection = await db.getConnection();
+    connection = await db.getConnection();
     const check = await connection.execute(
       `SELECT * FROM TBL_USER WHERE USERID = :userId`,
       [userId],
@@ -69,8 +78,8 @@ router.post('/join', async (req, res) => { // CRUD를 위한 용도가 아니라
 
     // 2. 회원가입
     await connection.execute(
-      `INSERT INTO TBL_USER (USERID, PWD, USERNAME) VALUES (:userId, :pwd, :userName)`, // 중복 확인 후 insert문 실행.
-      [userId, pwd, userName], // 보낼 정보
+      `INSERT INTO TBL_USER (USERID, PWD, USERNAME) VALUES (:userId, :hashPwd, :userName)`, // 중복 확인 후 insert문 실행.
+      { userId: userId, hashPwd: hashPwd, userName: userName }, // 보낼 정보
       { autoCommit: true }
     );
     let info = { userName: userName };

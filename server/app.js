@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const oracledb = require('oracledb');
+var QRCode = require('qrcode');
+
 const studentRouter = require("./routes/student"); // ★사용할 js 파일들 선언
 const userRouter = require("./routes/user");
 const boardRouter = require("./routes/board");
@@ -39,6 +41,24 @@ async function startServer() {
     process.exit(1); // DB 연결 실패 시 프로세스 종료 (선택 사항)
   }
 }
+
+app.get("/qrcode", async (req, res) => { // => 위치 수정
+  try {
+    // await를 사용할 때는 콜백 함수를 넣지 않습니다. url 변수에 데이터가 바로 담깁니다.
+    let qrImg = await QRCode.toDataURL("https://www.naver.com");
+    // http://localhost:3000/qrcode
+    
+    console.log(qrImg); // 콘솔에 base64 이미지 데이터 출력
+    
+    // 클라이언트(브라우저)에게 QR 코드 이미지를 보여주거나 전송하는 로직이 필요합니다.
+    res.send(`<img src="${qrImg}"/>`); 
+    
+  } catch (err) {
+    // 에러 메시지를 QR 코드 생성 실패에 맞게 수정했습니다.
+    console.error('QR 코드 생성 중 오류가 발생했습니다.', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 startServer();
 
 // 서버 시작

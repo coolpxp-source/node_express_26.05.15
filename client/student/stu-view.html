@@ -64,7 +64,7 @@
             },
             fnDetail: function(stuNo) {
                 let self = this;
-                fetch(`http://localhost:3000/student/`+stuNo)
+                fetch(`http://localhost:3000/student/${stuNo}`)
                     .then(res => res.json())
                     .then(data => {
                         console.log(data);
