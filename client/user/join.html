@@ -9,33 +9,41 @@
 <body>
     <div id="app">
         <div>
-            <label>아이디 : <input type="text" v-model="info.userId"></label>
-        </div>
-        <div>
-            <label>비밀번호 : <input type="password" v-model="info.pwd"></label>
-        </div>
-        <div>
-            <button @click="fnLogin()">로그인</button>
+            <table>
+                <tr>
+                    <td>아이디 : <input type="text" v-model="info.userId"></td>
+                </tr>
+                <tr>
+                    <td>비밀번호 : <input type="password" v-model="info.pwd"></td>
+                </tr>
+                <tr>
+                    <td>이름 : <input type="text" v-model="info.userName"></td>
+                </tr>
+            </table>
+            <div>
+                <button @click="fnJoin()">회원가입</button>
+            </div>
         </div>
     </div>
 </body>
 </html>
 <script>
-    const app = Vue.createApp({
+     const app = Vue.createApp({
         data() {
             return {
                 // 변수 - (key : value)
                 info : {
                     userId : "",
-                    pwd : ""
+                    pwd : "",
+                    userName : ""
                 }
             }
         },
         methods: {
             // 함수(메소드) - (key : function())
-            fnLogin: function() {
+            fnJoin: function() {
                 let self = this;
-                fetch("http://localhost:3000/login", {
+                fetch("http://localhost:3000/join", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(self.info)
@@ -44,11 +52,12 @@
                     .then(data => {
                         console.log(data);
                         if (data.result === "success") {
-                            alert(data.info.userName +"님 로그인 성공!");
-                            <!-- location.href = "#"; -->
+                            alert(data.info.userName +"님 환영합니다!");
+                            location.href = "../student/stu-list.html";
                         } else {
-                            alert("아이디 또는 비밀번호가 틀렸습니다.");
-                        }
+                            alert("이미 가입된 회원입니다.");
+                        } 
+    
                     })
             },
         }, // methods

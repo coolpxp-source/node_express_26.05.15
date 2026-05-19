@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>Document</title>
+    <style>
+        table, tr, td, th{
+            border : 1px solid black;
+            border-collapse: collapse;
+            padding : 5px 10px;
+            text-align: center;
+        }
+        th{
+            background-color: beige;
+        }
+        tr:nth-child(even){
+            background-color: azure;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- html 코드는 id가 app인 태그 안에서 작업 -->
+        <div>
+            <div style="margin: 20px; padding : 10px;">
+                <div>
+                    <label>검색어 : 
+                        <input v-model="keyword">
+                        <button @click="fnList()">검색</button>
+                    </label>
+                    <select v-model="sortBy" @change="fnList()">
+                        <option value="CDATETIME">날짜순</option>
+                        <option value="TITLE">제목순</option>
+                        <option value="CNT">조회수</option>
+                    </select>
+                </div>
+            </div>
+            <table>
+                <tr>
+                    <td>게시글 번호</td>
+                    <td>아이디</td>
+                    <td>제목</td>
+                    <td>내용</td>
+                    <td>조회수</td>
+                    <td>작성일</td>
+                </tr>
+                <tr v-for="item in list">
+                    <td>{{item.BOARDNO}}</td>
+                    <td>{{item.USERID}}</td>
+                    <td>{{item.TITLE}}</td>
+                    <td>{{item.CONTENTS}}</td>
+                    <td>{{item.CNT}}</td>
+                    <td>{{item.CDATE}}</td>
+                    <td><button >삭제</button></td>
+                    <!-- 수정 버튼 클릭 시 해당 학생의 학과를 '소프트웨어'로 변경 -->
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                // 변수 - (key : value)
+                list : [],
+                keyword : "",
+                sortBy : "CDATETIME",
+            };
+        },
+        methods: {
+            // 함수(메소드) - (key : function())
+            fnList: function () {
+                let self = this;
+                // fetch의 기본 method는 get
+                // server의 get 함수 호출
+                fetch(`http://localhost:3000/board?keyword=${self.keyword}&sortBy=${self.sortBy}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        self.list = data.list;
+                        self.list.forEach(item => { // item -> 원하는 이름 사용 가능(리스트의 첫번째 값이 item에 담긴다!)
+                            item.viewUrl = "board-list.html?boardNo=" + item.BOARDNO;
+                        });
+                    })
+            },
+        }, // methods
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+            let self = this;
+            this.fnList();
+        }
+    });
+    app.mount('#app');
+</script>
