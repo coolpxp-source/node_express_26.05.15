@@ -11,7 +11,10 @@
         <div>
             <table>
                 <tr>
-                    <td>아이디 : <input type="text" v-model="info.userId"></td>
+                    <td>아이디 : 
+                        <input type="text" v-if="!result" v-model="info.userId">
+                        <input type="text" v-else v-model="info.userId" disabled>
+                    </td>
                 </tr>
                 <tr>
                     <td>비밀번호 : <input type="password" v-model="info.pwd"></td>
@@ -35,7 +38,8 @@
                 info : {
                     userId : "",
                     pwd : "",
-                    userName : ""
+                    userName : "",
+                    result : false
                 }
             }
         },
@@ -43,6 +47,10 @@
             // 함수(메소드) - (key : function())
             fnJoin: function() {
                 let self = this;
+                if(!self.result){
+                    alert("중복체크 후 이용 가능합니다.")
+                    return;
+                }
                 fetch("http://localhost:3000/user/join", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -52,6 +60,7 @@
                     .then(data => {
                         console.log(data);
                         if (data.result === "success") {
+                            self.result = data.result;
                             alert(data.info.userName +"님 환영합니다!");
                             location.href = "../student/stu-list.html";
                         } else {

@@ -147,3 +147,31 @@ router.put('/:boardNo', async (req, res) => {
     if (connection) await connection.close();  // ← 항상 반환
   }
 });
+
+// add
+router.post('/', async (req, res) => {
+  console.log(req.body);
+  const { title, contents, userId } = req.body;  // 대문자로
+  let connection;
+  try {
+    connection = await db.getConnection();
+    const result = await connection.execute( // key랑 :바인딩변수만 일치하면 대소문자 무관
+      `INSERT INTO TBL_BOARD (
+      BOARDNO, USERID, 
+      TITLE, CONTENTS, 
+      CNT, KIND, CDATETIME, 
+      UDATETIME )
+      VALUES(
+      BOARD_SEQ.NEXTVAL, :userId, :title, :contents, 0, '1', SYSDATE, SYSDATE)
+      `,
+     { userId: userId, title: title, contents: contents },  // key랑 :바인딩변수만 일치하면 대소문자 무관
+      { autoCommit: true }
+    );
+    res.json({ result: "success" });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).send('Error executing query');
+  }finally {
+    if (connection) await connection.close();  // ← 항상 반환
+  }
+});
